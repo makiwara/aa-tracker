@@ -37,13 +37,12 @@
                 return false;
             }
         },
-        setFootprint: function(value, date) { // stores a footprint value into localStorage.
+        setFootprint: function(value, date, undef) { // stores a footprint value into localStorage.
             if (eCG.isLocalStorageAvail()) {
-                var print = [value, date, eCG.dateNow()].join(",")
-                w.localStorage.setItem(storagePARAM, print);
+                w.localStorage.setItem(storagePARAM, [value, date?date:eCG.dateNow(), eCG.dateNow()].join(","));
             }
         },
-        getFootprint: function() { // gets the footprint as list: (value, date, refreshDate)
+        getFootprint: function() { // gets the footprint as list: [value, date, refreshDate]
             if (eCG.isLocalStorageAvail()) {
                 var r = w.localStorage.getItem(storagePARAM);
                 return (r == null) ? [""] : r.split(",");
@@ -52,7 +51,7 @@
         hasFootprint: function() { // checks if there is a fresh footprint which was not sent recently.
             var fp = eCG.getFootprint();
             if (eCG.dateDiff(new Date(), eCG.restoreDate(fp[1])) < footprintLifetime) {
-                if (DEBUG || fp[1] != fp[2]) {
+                if (DEBUG || fp[2] != eCG.dateNow()) {
                     eCG.setFootprint(fp[0], fp[1]);
                     return true;
                 }
@@ -141,9 +140,6 @@
         track: function(domain, events, sendFootprint) { // MAIN! Stores tracking data and sends it back.
             var td  = eCG.getParam();
             var tds = eCG.getData();
-            if (DEBUG && tds.length==0 && w.Admarkt.sample) {
-                tds = w.Admarkt.sample;
-            }
             var td_landed = false;
             if (td != '') {
                 window.history.replaceState(PARAM+'_landing', document.title, eCG.reduceParam());
@@ -153,13 +149,13 @@
                 eCG.setCookie(tds.join(","));
                 td_landed = td;
                 if (sendFootprint) {
-                    eCG.setFootprint([td_landed, eCG.dateNow(), eCG.dateNow()].join(","));
+                    eCG.setFootprint(td_landed);
                 }
             }
             if (tds.length > 0) {
                 eCG.send({ tds: tds, events: events, landing: td_landed?tds.length-1:null });
             } else if (sendFootprint && eCG.hasFootprint()) {
-                eCG.send({ tds: [eCG.getFootprint()[0]], events: events, footprint:0 });
+                eCG.send({ tds: [eCG.getFootprint()], events: events, footprint:0 });
             }
         }
     }
