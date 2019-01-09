@@ -137,10 +137,11 @@
                 f();
             }
         },
-        track: function(domain, events, sendFootprint) { // MAIN! Stores tracking data and sends it back.
+        track: function(events, sendFootprint) { // MAIN! Stores tracking data and sends it back.
             var td  = eCG.getParam();
             var tds = eCG.getData();
             var td_landed = false;
+            var only_landing = events?false:true;
             if (td != '') {
                 window.history.replaceState(PARAM+'_landing', document.title, eCG.reduceParam());
                 if (tds.indexOf(td) < 0) {
@@ -148,20 +149,29 @@
                 }
                 eCG.setCookie(tds.join(","));
                 td_landed = td;
+                if (only_landing) {
+                    events = ["landing"];
+                } else {
+                    events.push(["landing"]);
+                }
                 if (sendFootprint) {
                     eCG.setFootprint(td_landed);
                 }
             }
-            if (tds.length > 0) {
-                eCG.send({ tds: tds, events: events, landing: td_landed?tds.length-1:null });
-            } else if (sendFootprint && eCG.hasFootprint()) {
-                eCG.send({ tds: [eCG.getFootprint()], events: events, footprint:0 });
+            if (events) {
+                if (tds.length > 0) {
+                    eCG.send({ tds: tds, events: events, landing: td_landed?tds.length-1:null });
+                } else if (sendFootprint && eCG.hasFootprint()) {
+                    eCG.send({ tds: [eCG.getFootprint()], events: events, footprint:0 });
+                }
             }
         }
     }
     var t = function() {
         if (w.Admarkt) {
-            eCG.track(w.Admarkt.domain, w.Admarkt.events, w.Admarkt.footprint);
+            eCG.track(w.Admarkt["events"], w.Admarkt["footprint"]);
+        } else {
+            eCG.track();
         }
     }
     if (DEBUG) { t(); }
