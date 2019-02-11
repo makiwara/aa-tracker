@@ -37,7 +37,7 @@
             return false;
         }
     },
-    setFootprint: function(value, date, undef) { // stores a footprint value into localStorage.
+    setFootprint: function(value, date) { // stores a footprint value into localStorage.
         if (eCG.isLocalStorageAvail()) {
             w.localStorage.setItem(storagePARAM, [value, date?date:eCG.dateNow(), eCG.dateNow()].join(","));
         }
@@ -91,13 +91,9 @@
         return result;
     },
     getData: function() { // returns tracking data stored in the session storage.
-        var tds = eCG.getCookie();
-        if (!tds) tds = "";
-        tds = tds.split(",");
-        while (tds[0] == "") {
-            tds.shift();
-        }
-        return tds;
+        var tdSaved = eCG.getCookie();
+        if (!tdSaved) tdSaved = "";
+        return tdSaved;
     },
     serialize: function(obj) { // serializes object into GET querystring.
         var str = [];
@@ -139,30 +135,30 @@
     },
     track: function(events, sendFootprint) { // MAIN! Stores tracking data and sends it back.
         var td  = eCG.getParam();
-        var tds = eCG.getData();
-        var td_landed = false;
-        var only_landing = events?false:true;
+        var tdSaved = eCG.getData();
+        var tdLanded = false;
+        if (DEBUG && tdSaved=="" && w.Admarkt.sample) {
+            tdSaved = w.Admarkt.sample;
+        }
+        var onlyLanding = events?false:true;
         if (td != '') {
             window.history.replaceState(PARAM+'_landing', document.title, eCG.reduceParam());
-            if (tds.indexOf(td) < 0) {
-                tds.push(td);
-            }
-            eCG.setCookie(tds.join(","));
-            td_landed = td;
-            if (only_landing) {
+            eCG.setCookie(td);
+            tdLanded = tdSaved = td;
+            if (onlyLanding) {
                 events = ["landing"];
             } else {
-                events.push(["landing"]);
+                events.push("landing");
             }
             if (sendFootprint) {
-                eCG.setFootprint(td_landed);
+                eCG.setFootprint(tdLanded);
             }
         }
         if (events) {
-            if (tds.length > 0) {
-                eCG.send({ tds: tds, events: events, landing: td_landed?tds.length-1:null });
+            if (tdSaved.length > 0) {
+                eCG.send({ td: tdSaved, event: events });
             } else if (sendFootprint && eCG.hasFootprint()) {
-                eCG.send({ tds: [eCG.getFootprint()], events: events, footprint:0 });
+                eCG.send({ td: eCG.getFootprint()[0], event: events, footprint:true });
             }
         }
     }
