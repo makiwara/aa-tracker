@@ -2,6 +2,6 @@
 
 This is a prototype of a small script to track performance data through 3rd party website.
 
-It is built for the purpose of the demo how this concept should work.
+It is built to show how this concept should work and to serve as a temporary solution.
 
 Contact Nik Yaremko (makiwara@humanemagica.com) if you want to know more.
