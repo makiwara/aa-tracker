@@ -4,8 +4,8 @@
             return Object.prototype.toString.call(obj) === '[object Array]';
         }
     };
+    var EVENTS = { landing: "LANDING", footprintPrefix: "ASSISTED_" };
     var BASE_URL = "//projectabove.com/aa-tracker/register.js";
-    var CALLBACK = "ecg_callback";
     var PARAM = "ecg";
     var footprintLifetime = 30; // days for footprint being alive
     var storagePARAM = PARAM + "TrackingData";
@@ -79,7 +79,7 @@
     },
     getParam: function() { // gets the param value from the querystring.
         var results = rePARAM.exec(document.location.href);
-        if (!results || !results[3]) {
+        if (!results || !results[3]) { // third match piece is the value
             return '';
         } else {
             return decodeURIComponent(results[3].replace(/\+/g, ' '));
@@ -121,7 +121,7 @@
         };
         s.type = "text/javascript";
         s.async = true;
-        s.src = BASE_URL+ "?_=" + Math.random() + "&" + eCG.serialize(obj);
+        s.src = BASE_URL+ "?v=" + Math.random() + "&" + eCG.serialize(obj);
         if (DEBUG) {
             console.log("send:",       obj);
             console.log("serialized:", eCG.serialize(obj))
@@ -134,31 +134,30 @@
         }
     },
     track: function(events, sendFootprint) { // MAIN! Stores tracking data and sends it back.
-        var td  = eCG.getParam();
+        if (!events) events = [];
+        var td      = eCG.getParam();
         var tdSaved = eCG.getData();
-        var tdLanded = false;
-        if (DEBUG && tdSaved=="" && w.Admarkt.sample) {
+        if (DEBUG && tdSaved == "" && w.Admarkt.sample) { // for testing purposes
             tdSaved = w.Admarkt.sample;
         }
-        var onlyLanding = events?false:true;
-        if (td != '') {
+        if (td != '') { // landing with new tracking data
             window.history.replaceState(PARAM+'_landing', document.title, eCG.reduceParam());
             eCG.setCookie(td);
-            tdLanded = tdSaved = td;
-            if (onlyLanding) {
-                events = ["landing"];
-            } else {
-                events.push("landing");
-            }
-            if (sendFootprint) {
-                eCG.setFootprint(tdLanded);
-            }
+            eCG.setFootprint(td);
+            tdSaved = td;
+            events.push(EVENTS.landing);
         }
-        if (events) {
-            if (tdSaved.length > 0) {
-                eCG.send({ td: tdSaved, event: events });
-            } else if (sendFootprint && eCG.hasFootprint()) {
-                eCG.send({ td: eCG.getFootprint()[0], event: events, footprint:true });
+        if (events) { // have to send events
+            for (var i in events) {
+                events[i] = events[i].toUpperCase();
+            }
+            if (tdSaved != "") { // within session
+                eCG.send({ td: tdSaved, events: events });
+            } else if (sendFootprint && eCG.hasFootprint()) { // 30d footprint for assisted events
+                for (var i in events) {
+                    events[i] = (EVENTS.footprintPrefix+events[i]).toUpperCase();
+                }
+                eCG.send({ td: eCG.getFootprint()[0], events: events });
             }
         }
     }
