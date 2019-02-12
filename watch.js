@@ -137,8 +137,8 @@
         if (!events) events = [];
         var td      = eCG.getParam();
         var tdSaved = eCG.getData();
-        if (DEBUG && tdSaved == "" && w.Admarkt.sample) { // for testing purposes
-            tdSaved = w.Admarkt.sample;
+        if (DEBUG && tdSaved == "" && w.admarkt.sample) { // for testing purposes
+            tdSaved = w.admarkt.sample;
         }
         if (td != '') { // landing with new tracking data
             window.history.replaceState(PARAM+'_landing', document.title, eCG.reduceParam());
@@ -163,8 +163,8 @@
     }
 }
 var t = function() {
-    if (w.Admarkt) {
-        eCG.track(w.Admarkt["events"], w.Admarkt["footprint"]);
+    if (w.admarkt) {
+        eCG.track(w.admarkt["events"], w.admarkt["footprint"]);
     } else {
         eCG.track();
     }
