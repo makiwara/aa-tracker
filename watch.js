@@ -137,7 +137,7 @@
         w.console.log("serialized:", eCG.serialize(obj));
         return;
       }
-      if (w.opera.toString() === "[object Opera]") {
+      if (w.opera && w.opera.toString() === "[object Opera]") {
         d.addEventListener("DOMContentLoaded", f, false);
       } else {
         f();
@@ -147,7 +147,7 @@
       if (!events) { events = []; }
       var td = eCG.getParam();
       var tdSaved = eCG.getData();
-      if (DEBUG && tdSaved === "" && w.admarkt.sample) { // for testing purposes
+      if (DEBUG && tdSaved === "" && w.admarkt && w.admarkt.sample) { // for testing purposes
         tdSaved = w.admarkt.sample;
       }
       if (td !== "") { // landing with new tracking data
