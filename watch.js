@@ -3,7 +3,7 @@
         Array.isArray = function(obj) {
             return Object.prototype.toString.call(obj) === '[object Array]';
         }
-    };
+    }
     var EVENTS = { landing: "LANDING", footprintPrefix: "ASSISTED_" };
     var BASE_URL = "//projectabove.com/aa-tracker/register.js";
     var PARAM = "ecg";
@@ -62,7 +62,7 @@
         if (eCG.isLocalStorageAvail()) {
             w.sessionStorage.setItem(storagePARAM, v);
         } else {
-            document.cookie = PARAM + "=" + v;
+            d.cookie = PARAM + "=" + v;
         }
     },
     getCookie: function() { // gets the stored value from the session storage (fallback to cookies).
@@ -71,14 +71,14 @@
             return (r == null)?"":r;
         } else {
             try {
-                return decodeURIComponent(document.cookie.match(reCookie)[1]);
+                return decodeURIComponent(d.cookie.match(reCookie)[1]);
             } catch (e) {
                 return "";
             }
         }
     },
     getParam: function() { // gets the param value from the querystring.
-        var results = rePARAM.exec(document.location.href);
+        var results = rePARAM.exec(d.location.href);
         if (!results || !results[3]) { // third match piece is the value
             return '';
         } else {
@@ -86,7 +86,7 @@
         }
     },
     reduceParam: function() { // removes the param from the querystring.
-        var result = document.location.href.replace(rePARAM, "$1");
+        var result = d.location.href.replace(rePARAM, "$1");
         result = result.replace(/\?&/, "?").replace(/&&/, "&").replace(/&$/, "");
         return result;
     },
@@ -97,7 +97,8 @@
     },
     serialize: function(obj) { // serializes object into GET querystring.
         var str = [];
-        for (var p in obj) {
+        var p;
+        for (p in obj) {
             if (obj.hasOwnProperty(p)) {
                 if (Array.isArray(obj[p])) {
                     for (var k in obj[p]) {
@@ -108,7 +109,7 @@
                 }
             }
         }
-        for (var p in str) {
+        for (p in str) {
             str[p] = str[p].join("=");
         }
         return str.join("&");
@@ -123,7 +124,7 @@
         s.async = true;
         s.src = BASE_URL+ "?v=" + Math.random() + "&" + eCG.serialize(obj);
         if (DEBUG) {
-            console.log("send:",       obj);
+            console.log("send:", obj);
             console.log("serialized:", eCG.serialize(obj))
             return;
         }
@@ -134,6 +135,7 @@
         }
     },
     track: function(events, sendFootprint) { // MAIN! Stores tracking data and sends it back.
+        var index;
         if (!events) events = [];
         var td      = eCG.getParam();
         var tdSaved = eCG.getData();
@@ -141,21 +143,21 @@
             tdSaved = w.admarkt.sample;
         }
         if (td != '') { // landing with new tracking data
-            window.history.replaceState(PARAM+'_landing', document.title, eCG.reduceParam());
+            window.history.replaceState(PARAM+'_landing', d.title, eCG.reduceParam());
             eCG.setCookie(td);
             eCG.setFootprint(td);
             tdSaved = td;
             events.push(EVENTS.landing);
         }
         if (events) { // have to send events
-            for (var i in events) {
-                events[i] = events[i].toUpperCase();
+            for (index in events) {
+                events[index] = events[index].toUpperCase();
             }
             if (tdSaved != "") { // within session
                 eCG.send({ td: tdSaved, events: events });
             } else if (sendFootprint && eCG.hasFootprint()) { // 30d footprint for assisted events
-                for (var i in events) {
-                    events[i] = (EVENTS.footprintPrefix+events[i]).toUpperCase();
+                for (index in events) {
+                    events[index] = (EVENTS.footprintPrefix+events[index]).toUpperCase();
                 }
                 eCG.send({ td: eCG.getFootprint()[0], events: events });
             }
@@ -170,5 +172,5 @@ var t = function() {
     }
 }
 if (DEBUG) { t(); }
-else { try { t(); } catch(e) {} }
+else { try { t(); } catch(e) { return } }
 })(document, window);
