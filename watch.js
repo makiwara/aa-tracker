@@ -49,11 +49,11 @@
         var r = w.localStorage.getItem(storagePARAM);
         return (r === null) ? [""] : r.split(",");
       }
-      return "";
+      return false;
     },
     hasFootprint: function() { // checks if there is a fresh footprint which was not sent recently.
       var fp = eCG.getFootprint();
-      if (eCG.dateDiff(new Date(), eCG.restoreDate(fp[1])) < footprintLifetime) {
+      if (fp !== false && eCG.dateDiff(new Date(), eCG.restoreDate(fp[1])) < footprintLifetime) {
         if (DEBUG || fp[2] !== eCG.dateNow().toString()) {
           eCG.setFootprint(fp[0], fp[1]);
           return true;
@@ -178,6 +178,12 @@
   };
   var t = function() {
     if (w.admarkt) {
+      w.admarkt.track = function(events) {
+        if (!Array.isArray(events)) {
+          events = [events];
+        }
+        return eCG.track(events);
+      };
       eCG.track(w.admarkt.events, w.admarkt.footprint);
     } else {
       eCG.track();

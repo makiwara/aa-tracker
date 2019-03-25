@@ -1,6 +1,6 @@
 <html>
 <head>
-    <title>Test for A.A. Tracker: Checkout and Footprint</title>
+    <title>Test for A.A. Tracker: Checkout, Footprint and Custom Tracking</title>
 </head>
 <body>
     <h1>Test for A.A. Tracker: Checkout and Footprint</h1>
@@ -21,6 +21,12 @@
     };
 </script>
 <!-- admarkt additional events, optional (end) -->
+
+<div style="padding:20; font: 20px Arial, sans-serif">
+    <button onclick="window.admarkt.track('basket')">
+        Send BASKET
+    </button>
+</div>
 
 </body>
 </html>
