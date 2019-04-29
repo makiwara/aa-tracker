@@ -165,7 +165,7 @@
         }
         return events;
       };
-      if (events) { // have to send events
+      if (events.length > 0) { // have to send events
         events = upperCaseEvents(events);
         if (tdSaved !== "") { // within session
           eCG.send({ td: tdSaved, events: events });
